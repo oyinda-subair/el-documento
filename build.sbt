@@ -33,7 +33,7 @@ val log4jCore      = "org.apache.logging.log4j"      %  "log4j-core"            
 val qos            = "ch.qos.logback" % "logback-classic" % "1.2.3"
 val scalaLogging   = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
 val sentryIO       = "io.sentry" % "sentry" % sentryVersion
-val sentryIOLog4J       = "io.sentry" % "sentry-logback" % sentryVersion
+val sentryIOLogback  = "io.sentry" % "sentry-logback" % sentryVersion
 
 val akkaHttpSessionCore = "com.softwaremill.akka-http-session" %% "core" % akkaHttpSessionVersion
 val akkaHttpSessionJwt  = "com.softwaremill.akka-http-session" %% "jwt"  % akkaHttpSessionVersion
@@ -78,7 +78,7 @@ lazy val root = (project in file("."))
       scalaLogging,
       scalaTest,
       sentryIO,
-      sentryIOLog4J
+      sentryIOLogback
     )
   )
 
