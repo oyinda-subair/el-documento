@@ -1,0 +1,4 @@
+# Team Yaml
+coverage:
+  round: down
+  precision: 5
