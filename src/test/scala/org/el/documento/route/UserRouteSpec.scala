@@ -45,11 +45,6 @@ class UserRouteSpec extends WordSpec with Matchers with DocumentoRouteTestkit wi
 
         Post(s"/$api/$version/users").withEntity(toEntity(userEntity)) ~> route ~> check {
           status shouldEqual StatusCodes.Created
-
-          val content = responseAs[UserClaim]
-
-          content.userId shouldBe defined
-          content.roleId shouldBe defined
         }
       }
     }

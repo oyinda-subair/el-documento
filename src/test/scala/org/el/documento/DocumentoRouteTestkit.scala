@@ -13,7 +13,7 @@ import org.el.documento.route.DocumentoRoute
 import org.scalatest.WordSpec
 import play.api.libs.json.{Json, Reads, Writes}
 
-trait DocumentoRouteTestkit  extends WordSpec with ScalatestRouteTest with ApplicationConfig with RouteHandlerConfig with PlayJsonSupport {
+trait DocumentoRouteTestkit extends WordSpec with ScalatestRouteTest with ApplicationConfig with RouteHandlerConfig with PlayJsonSupport {
 
   val db = new ElDocumentoDAO
   val version = "v1"

@@ -1,6 +1,5 @@
 package org.el.documento.database
 
-import akka.stream.alpakka.slick.javadsl.SlickSession
 import org.el.documento.config.ApplicationConfig
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
