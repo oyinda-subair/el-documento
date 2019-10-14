@@ -30,8 +30,8 @@ jobs:
            command: sbt test:compile
       - run: sbt flywayClean
       - run:
-          name: migrate database
-          command: sbt flywayMigrate
+          name: migrate database for test
+          command: sbt test:flywayMigrate
       - save_cache:
           paths: [ "~/.m2", "~/.ivy2", "~/.cache/coursier" ]
           key: scala-library-dependencies-{{ checksum "build.sbt" }}
