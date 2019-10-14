@@ -28,7 +28,7 @@ jobs:
       - run:
            name: compile
            command: sbt test:compile
-      - run: sbt flywayClean
+      - run: sbt test:flywayClean
       - run:
           name: migrate database for test
           command: sbt test:flywayMigrate
