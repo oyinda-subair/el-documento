@@ -20,13 +20,12 @@ class DocumentoControllerImpl(documentoDb: ElDocumentoDAO)(implicit val system: 
 
   // User commands
   def createUser(request: CreateUserRequest): Future[UserClaim] = {
-    println("got here")
     for {
       role <- documentoDb.RoleRepo.getRoleByTitle(Public.name)
       _ = if(role.isEmpty)
         logger.error("Role does not exist", HttpResponse(404, entity = s"Unfortunately, the resource ${Public.name} couldn't be found."))
       entity <- documentoDb.UserRepo.create(request, role.get.roleId)
-    } yield UserClaim(entity.user_id, entity.roleId)
+    } yield UserClaim(entity.userId, entity.roleId)
   }
 
   // Role commands

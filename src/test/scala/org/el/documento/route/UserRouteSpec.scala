@@ -38,7 +38,7 @@ class UserRouteSpec extends WordSpec with Matchers with DocumentoRouteTestkit wi
     Await.result(deleted, 10 seconds)
   }
 
-  "El Documento Route" when {
+  "El Documento user Route" when {
     "User Endpoints" should {
       "create user " in {
         val userEntity = CreateUserRequest("test user", "usertest", s"user-$string10", s"$string10")
@@ -47,7 +47,19 @@ class UserRouteSpec extends WordSpec with Matchers with DocumentoRouteTestkit wi
           status shouldEqual StatusCodes.Created
 
           val content = responseAs[UserClaim]
-          println(s"content: $content")
+
+          content.userId shouldBe defined
+          content.roleId shouldBe defined
+        }
+      }
+    }
+
+    "Role Endpoint" should {
+      "create role" in {
+        val roleRequest = CreateRoleRequest("sample role", Some("sample role"))
+
+        Post(s"/$api/$version/roles").withEntity(toEntity(roleRequest)) ~> route ~> check {
+          status shouldEqual StatusCodes.Created
         }
       }
     }
