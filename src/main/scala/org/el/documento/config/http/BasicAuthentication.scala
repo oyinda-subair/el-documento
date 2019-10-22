@@ -37,15 +37,6 @@ trait BasicAuthentication extends ApplicationConfig {
     }
   }
 
-//  def authenticateWithRole(token: String): Directive1[(UUID, Int)] = {
-//      jwtAuth.verifyJwtToken(token) match {
-//        case Some(user) => provide(getUserWithRoleId(user))
-//        case None =>
-//          logger.error("Invalid authorization credential type")
-//          reject(AuthorizationFailedRejection)
-//      }
-//  }
-
   def withPublicAuthentication: Directive1[UUID] = {
     extraToken.flatMap {
       case userClaim: UserClaim if isPublic(userClaim) => provide(userClaim.userId)
