@@ -41,6 +41,10 @@ trait RoleEntities extends DatabaseConnector {
       }
     }
 
+    def getRoleById(id: Int): Future[Option[RoleEntity]] = db.run {
+      roles.filter(_.id === id).result.headOption
+    }
+
     def getRoleByTitle(title: String): Future[Option[RoleEntity]] = db.run{
       roles.filter(_.title === title).result.headOption
     }

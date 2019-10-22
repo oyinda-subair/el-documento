@@ -1,22 +1,18 @@
 package org.el.documento
 
-import akka.Done
-import akka.actor.{ActorSystem, CoordinatedShutdown}
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
-//import io.sentry.{Sentry, SentryClient}
 import org.el.documento.config.ApplicationConfig
-import org.el.documento.config.http.RouteHandlerConfig
+import org.el.documento.config.http.{JWTAuthentication, JWTAuthenticationServices, RouteHandlerConfig}
 import org.el.documento.controller.{DocumentoController, DocumentoControllerImpl}
 import org.el.documento.database.ElDocumentoDAO
 import org.el.documento.route.DocumentoRoute
 
-import scala.concurrent.{Await, ExecutionContextExecutor, Future}
-import scala.concurrent.duration._
-import scala.io.StdIn
+import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 
 object ServiceMain extends PlayJsonSupport with ApplicationConfig with App with RouteHandlerConfig {
@@ -24,6 +20,8 @@ object ServiceMain extends PlayJsonSupport with ApplicationConfig with App with 
   implicit val system: ActorSystem = ActorSystem("el-documento")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+
+  implicit val jwt: JWTAuthenticationServices = new JWTAuthentication
 
   lazy val controller: DocumentoController = {
     val db = new ElDocumentoDAO

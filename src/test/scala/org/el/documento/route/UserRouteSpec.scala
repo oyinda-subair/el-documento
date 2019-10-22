@@ -1,14 +1,13 @@
 package org.el.documento.route
 
-//import akka.http.scaladsl.org.el.documento.testkit.ScalatestRouteTest
 import akka.Done
 import akka.http.scaladsl.model._
 import org.el.documento.DocumentoRouteTestkit
-import org.el.documento.messages.{CreateRoleRequest, CreateUserRequest}
+import org.el.documento.messages.{CreateRoleRequest, CreateUserRequest, LoginByEmail}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import org.el.documento.Util._
-import org.el.documento.model.UserClaim
+import org.el.documento.model.{UserClaim, UserToken}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -19,7 +18,7 @@ class UserRouteSpec extends WordSpec with Matchers with DocumentoRouteTestkit wi
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    val role = CreateRoleRequest("public", Some("restricted access"))
+    val role = CreateRoleRequest("public", Some("public access only"))
     val inserted = for {
       _ <- controller.createRole(role)
     } yield Done
@@ -47,6 +46,18 @@ class UserRouteSpec extends WordSpec with Matchers with DocumentoRouteTestkit wi
           status shouldEqual StatusCodes.Created
         }
       }
+
+      "Login use" in {
+        val userEntity = CreateUserRequest("test user login", "userlogin", s"user-login-$string10", s"$string10")
+        Post(s"/$api/$version/users").withEntity(toEntity(userEntity)) ~> route ~> check {
+          status shouldEqual StatusCodes.Created
+
+          val login = LoginByEmail(userEntity.email, userEntity.password)
+          Post(s"/$api/$version/login").withEntity(toEntity(login)) ~> route ~> check {
+            status shouldEqual StatusCodes.OK
+          }
+        }
+      }
     }
 
     "Role Endpoint" should {
@@ -54,7 +65,7 @@ class UserRouteSpec extends WordSpec with Matchers with DocumentoRouteTestkit wi
         val roleRequest = CreateRoleRequest("sample role", Some("sample role"))
 
         Post(s"/$api/$version/roles").withEntity(toEntity(roleRequest)) ~> route ~> check {
-          status shouldEqual StatusCodes.Created
+          status shouldEqual StatusCodes.Unauthorized
         }
       }
     }

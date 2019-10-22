@@ -49,12 +49,12 @@ trait UserEntities extends RoleEntities with DatabaseConnector {
   class UserRepository(implicit ec: ExecutionContext) {
     val users = TableQuery[UserTable]
 
-    def create(entity: CreateUserRequest, roleId: Int): Future[UserClaim] = {
+    def create(entity: CreateUserRequest, roleId: Int): Future[(UUID, Int)] = {
       val now = DateTime.now
       val user_id = UUID.randomUUID()
       val password = hashPassword(entity.password)
       val user = UserEntity(user_id, entity.name, entity.username, entity.email, password, roleId, now, None)
-      db.run(users returning users.map(u => (u.id, u.roleId)) += user).map(user => UserClaim(user._1, user._2))
+      db.run(users returning users.map(u => (u.id, u.roleId)) += user).map(user => (user._1, user._2))
     }
 
     def getAllUsers: Future[Seq[UserEntity]] =  db.run (users.result)

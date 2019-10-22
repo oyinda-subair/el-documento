@@ -10,7 +10,7 @@ trait DatabaseConnector extends ApplicationConfig {
 
   import driver.api._
 
-  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("slick-postgres")
+  private val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("slick-postgres")
 
   val db = databaseConfig.db
   implicit val session: Session = db.createSession()
