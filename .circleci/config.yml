@@ -9,6 +9,7 @@ jobs:
         environment:
           POSTGRES_USER: circleci
           POSTGRES_DB: el_documento_test
+    working_directory: ~/el-documento
     environment:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
@@ -24,18 +25,39 @@ jobs:
           name: Wait for db
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - restore_cache:
-          key: scala-library-dependencies-{{ checksum "build.sbt" }}
+          keys:
+          - el-documento-{{ checksum "project/build.sbt" }}-{{ checksum "build.sbt" }}
+          - el-documento
       - run:
            name: compile
            command: sbt test:compile
+      - save_cache:
+#          paths: [ "~/.m2", "~/.ivy2", "~/.cache/coursier" ]
+          key: el-documento-{{ checksum "project/build.sbt" }}-{{ checksum "build.sbt" }}
+          paths:
+            - target/resolution-cache
+            - target/streams
+            - project/target/resolution-cache
+            - project/target/streams
+            - ~/.sbt
+            - ~/.iv2/cache
+            - ~/.m2
+      - save_cache:
+          # Changing this to a different key is the only way to remove old dependencies from the cache and/or generate a more up-to-date cache
+          key: el-documento
+          paths:
+            - ~/.sbt
+            - ~/.iv2/cache
+            - ~/.m2
       - run:
           name: clean database
           command: sbt test:flywayClean
       - run:
           name: migrate database for test
           command: sbt test:flywayMigrate
-      - save_cache:
-          paths: [ "~/.m2", "~/.ivy2", "~/.cache/coursier" ]
-          key: scala-library-dependencies-{{ checksum "build.sbt" }}
-      - run: sbt clean coverage test coverageReport
-      - run: bash <(curl -s https://codecov.io/bash)
+      - run:
+          name: run test and coverage
+          command: sbt clean coverage test coverageReport
+      - run:
+          name: push coverage
+          command: bash <(curl -s https://codecov.io/bash)
