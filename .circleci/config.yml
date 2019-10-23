@@ -9,7 +9,6 @@ jobs:
         environment:
           POSTGRES_USER: circleci
           POSTGRES_DB: el_documento_test
-    working_directory: ~/el-documento
     environment:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
@@ -26,14 +25,14 @@ jobs:
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - restore_cache:
           keys:
-          - el-documento-{{ checksum "project/build.sbt" }}-{{ checksum "build.sbt" }}
-          - el-documento
+          - scala-library-dependencies-{{ checksum "project/build.sbt" }}-{{ checksum "build.sbt" }}
+          - scala-library-dependencies
       - run:
            name: compile
            command: sbt test:compile
       - save_cache:
 #          paths: [ "~/.m2", "~/.ivy2", "~/.cache/coursier" ]
-          key: el-documento-{{ checksum "project/build.sbt" }}-{{ checksum "build.sbt" }}
+          key: scala-library-dependencies-{{ checksum "project/build.sbt" }}-{{ checksum "build.sbt" }}
           paths:
             - target/resolution-cache
             - target/streams
