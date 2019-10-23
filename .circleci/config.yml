@@ -25,14 +25,14 @@ jobs:
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - restore_cache:
           keys:
-          - scala-library-dependencies-{{ checksum "project/build.sbt" }}-{{ checksum "build.sbt" }}
+          - scala-library-dependencies-{{ checksum "build.sbt" }}
           - scala-library-dependencies
       - run:
            name: compile
            command: sbt test:compile
       - save_cache:
 #          paths: [ "~/.m2", "~/.ivy2", "~/.cache/coursier" ]
-          key: scala-library-dependencies-{{ checksum "project/build.sbt" }}-{{ checksum "build.sbt" }}
+          key: scala-library-dependencies-{{ checksum "build.sbt" }}
           paths:
             - target/resolution-cache
             - target/streams
