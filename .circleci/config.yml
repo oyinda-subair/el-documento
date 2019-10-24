@@ -9,10 +9,10 @@ jobs:
         environment:
           POSTGRES_USER: root
           POSTGRES_DB: el_documento_test
-    environment:
-      # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
+#    environment:
+#      # Customize the JVM maximum heap limit
+#      JVM_OPTS: -Xmx3200m
+#      TERM: dumb
     steps:
       - checkout
       - run:
@@ -41,13 +41,13 @@ jobs:
             - ~/.sbt
             - ~/.iv2/cache
             - ~/.m2
-      - save_cache:
-          # Changing this to a different key is the only way to remove old dependencies from the cache and/or generate a more up-to-date cache
-          key: el-documento
-          paths:
-            - ~/.sbt
-            - ~/.iv2/cache
-            - ~/.m2
+#      - save_cache:
+#          # Changing this to a different key is the only way to remove old dependencies from the cache and/or generate a more up-to-date cache
+#          key: el-documento
+#          paths:
+#            - ~/.sbt
+#            - ~/.iv2/cache
+#            - ~/.m2
       - run:
           name: clean database
           command: sbt test:flywayClean
