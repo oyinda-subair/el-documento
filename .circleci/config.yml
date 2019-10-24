@@ -1,6 +1,7 @@
 version: 2
 jobs:
   build:
+    working_directory: ~/repo
     docker:
       - image: circleci/openjdk:8-jdk
       # Service container image available at `host: localhost`
@@ -9,10 +10,10 @@ jobs:
         environment:
           POSTGRES_USER: root
           POSTGRES_DB: el_documento_test
-#    environment:
-#      # Customize the JVM maximum heap limit
-#      JVM_OPTS: -Xmx3200m
-#      TERM: dumb
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
     steps:
       - checkout
       - run:
@@ -21,7 +22,7 @@ jobs:
           environment:
             DOCKERIZE_VERSION: v0.3.0
       - run:
-          name: Wait for db
+          name: Wait for postgres db to start
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - restore_cache:
           keys:
@@ -31,7 +32,6 @@ jobs:
            name: compile
            command: sbt test:compile
       - save_cache:
-#          paths: [ "~/.m2", "~/.ivy2", "~/.cache/coursier" ]
           key: scala-library-dependencies-{{ checksum "build.sbt" }}
           paths:
             - target/resolution-cache
@@ -41,13 +41,13 @@ jobs:
             - ~/.sbt
             - ~/.iv2/cache
             - ~/.m2
-#      - save_cache:
-#          # Changing this to a different key is the only way to remove old dependencies from the cache and/or generate a more up-to-date cache
-#          key: el-documento
-#          paths:
-#            - ~/.sbt
-#            - ~/.iv2/cache
-#            - ~/.m2
+      - save_cache:
+          # Changing this to a different key is the only way to remove old dependencies from the cache and/or generate a more up-to-date cache
+          key: el-documento
+          paths:
+            - ~/.sbt
+            - ~/.iv2/cache
+            - ~/.m2
       - run:
           name: clean database
           command: sbt test:flywayClean
