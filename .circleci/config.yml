@@ -5,9 +5,9 @@ jobs:
       - image: circleci/openjdk:8-jdk
       # Service container image available at `host: localhost`
 
-      - image: circleci/postgres:9.6.9
+      - image: circleci/postgres:9.6.9-postgis
         environment:
-          POSTGRES_USER: circleci
+          POSTGRES_USER: postgres
           POSTGRES_DB: el_documento_test
     environment:
       # Customize the JVM maximum heap limit
