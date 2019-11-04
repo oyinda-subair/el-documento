@@ -21,7 +21,7 @@ trait DocumentoController {
   def loginByEmail(request: LoginByEmail): Future[UserToken]
 }
 
-class DocumentoControllerImpl(documentoDb: ElDocumentoDAO)(implicit val system: ActorSystem, jwtAuth: JWTAuthenticationServices) extends ApplicationConfig with DocumentoController {
+class DocumentoControllerImpl(documentoDb: ElDocumentoDAO)(implicit val system: ActorSystem, jwt: JWTAuthenticationServices) extends ApplicationConfig with DocumentoController {
 
   // User commands
 
@@ -32,7 +32,8 @@ class DocumentoControllerImpl(documentoDb: ElDocumentoDAO)(implicit val system: 
       role <- getRoleById(entity._2)
     } yield {
       val userClaim = UserClaim(entity._1, role.title)
-      val token = jwtAuth.generateToken(userClaim)
+      val token = jwt.generateToken(userClaim)
+      println(s"token: $token")
       UserToken(token).bearerToken
     }
   }
@@ -53,7 +54,7 @@ class DocumentoControllerImpl(documentoDb: ElDocumentoDAO)(implicit val system: 
       role <- getRoleById(user.roleId)
     } yield {
       if(confirmPassword(request.password, user.password)) {
-        val token = jwtAuth.generateToken(UserClaim(user.userId, role.title))
+        val token = jwt.generateToken(UserClaim(user.userId, role.title))
         UserToken(token).bearerToken
       } else {
         logger.error("Incorrect Password")
