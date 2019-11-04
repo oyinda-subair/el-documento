@@ -33,7 +33,6 @@ class DocumentoControllerImpl(documentoDb: ElDocumentoDAO)(implicit val system: 
     } yield {
       val userClaim = UserClaim(entity._1, role.title)
       val token = jwt.generateToken(userClaim)
-      println(s"token: $token")
       UserToken(token).bearerToken
     }
   }
