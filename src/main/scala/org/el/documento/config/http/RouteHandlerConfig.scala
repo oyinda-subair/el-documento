@@ -34,10 +34,11 @@ trait RouteHandlerConfig extends ApplicationConfig{
     ExceptionHandler {
       case e: ResourceNotFoundException => logException(NotFound, e.message, "Not Found Error")
       case e: UnauthorizedUserException => logException(Unauthorized, e.message, "Unauthorized Error")
-      case _: Exception =>
+      case e: Exception =>
         extractUri { uri =>
-          val errorResponse = ErrorResponse(InternalServerError.intValue, "Internal Server Error", "Error processing request").toStrEntity
+          val errorResponse = ErrorResponse(InternalServerError.intValue, "Internal Server Error", e.getLocalizedMessage).toStrEntity
           logger.error(s"Request to $uri could not be handled normally")
+          e.printStackTrace()
           complete(HttpResponse(InternalServerError, entity = errorResponse))
         }
     }
