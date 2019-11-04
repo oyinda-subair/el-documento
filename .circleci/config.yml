@@ -1,120 +1,155 @@
-aliases:
-  - &restore_cache
-    keys:
-      - scala-library-dependencies-{{ checksum "build.sbt" }}
-  - &save_cache
-    name: Save sbt cache
-    key: scala-library-dependencies-{{ checksum "build.sbt" }}
-    paths:
-      - target/resolution-cache
-      - target/streams
-      - project/target/resolution-cache
-      - project/target/streams
-      - ~/.sbt
-      - ~/.iv2/cache
-      - ~/.m2
-  - &remove_old_cache
-    key: repo
-    paths:
-      - ~/.sbt
-      - ~/.iv2/cache
-      - ~/.m2
-  - &test_compile
-    name: compile
-    command: sbt compile test:compile
-  - &attach_workspace
-    attach_workspace:
-      at: ~/repo
-  - &dockerize
-    name: install dockerize
-    command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-    environment:
-      DOCKERIZE_VERSION: v0.6.1
-  - &start_database
-    name: Wait for postgres db to start
-    command: dockerize -wait tcp://localhost:5432 -timeout 1m
-  - &undo_db_migration
-    name: clean database
-    command: sbt test:flywayClean
-  - &run_db_migration
-    name: migrate database for test
-    command: sbt test:flywayMigrate
-  - &sbt_test
-    name: sbt test
-    command: sbt clean coverage test coverageReport
-  - &push_coverage
-    name: push coverage to codecov
-    command: bash <(curl -s https://codecov.io/bash)
-  - &dependencies
-    - checkout
-    - *attach_workspace
-    - restore_cache: *restore_cache
-    - run: *test_compile
-    - save_cache: *save_cache
-    - save_cache: *remove_old_cache
-  - &database
-    - checkout
-    - *attach_workspace
-    - run: *dockerize
-    - run: *start_database
-    - run: *undo_db_migration
-    - run: *run_db_migration
-
-  - &test_setup
-    - checkout
-    - *attach_workspace
-    - run: *sbt_test
-    - run: *push_coverage
-
-  #  build environment
-  - &build_environment
-    working_directory: ~/repo
-    docker:
-      - image: circleci/openjdk:8-jdk
-
-  - &test_environment
-    working_directory: ~/repo
-    docker:
-      - image: circleci/openjdk:8-jdk
-      # Service container image available at `host: localhost`
-      - image: circleci/postgres:9.6.9-postgis
-        environment:
-          POSTGRES_USER: root
-          POSTGRES_DB: el_documento_test
-  - &environment
-    environment:
-      # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
-
-  # Requirement groups
-  - &deps
-    - "Dependencies"
-  - &deps_and_db
-    - "Dependencies"
-    - "Database"
-  - &all_test
-    - "Dependencies"
-    - "Database"
-    - "Test"
+#aliases:
+#  - &restore_cache
+#    keys:
+#      - scala-library-dependencies-{{ checksum "build.sbt" }}
+#  - &save_cache
+#    name: Save sbt cache
+#    key: scala-library-dependencies-{{ checksum "build.sbt" }}
+#    paths:
+#      - target/resolution-cache
+#      - target/streams
+#      - project/target/resolution-cache
+#      - project/target/streams
+#      - ~/.sbt
+#      - ~/.iv2/cache
+#      - ~/.m2
+#  - &remove_old_cache
+#    key: repo
+#    paths:
+#      - ~/.sbt
+#      - ~/.iv2/cache
+#      - ~/.m2
+#  - &test_compile
+#    name: compile
+#    command: sbt compile test:compile
+#  - &attach_workspace
+#    attach_workspace:
+#      at: ~/repo
+#  - &dockerize
+#    name: install dockerize
+#    command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+#    environment:
+#      DOCKERIZE_VERSION: v0.6.1
+#  - &start_database
+#    name: Wait for postgres db to start
+#    command: dockerize -wait tcp://localhost:5432 -timeout 1m
+#  - &undo_db_migration
+#    name: clean database
+#    command: sbt test:flywayClean
+#  - &run_db_migration
+#    name: migrate database for test
+#    command: sbt test:flywayMigrate
+#  - &sbt_test
+#    name: sbt test
+#    command: sbt clean coverage test coverageReport
+#  - &push_coverage
+#    name: push coverage to codecov
+#    command: bash <(curl -s https://codecov.io/bash)
+#  - &dependencies
+#    - checkout
+#    - *attach_workspace
+#    - restore_cache: *restore_cache
+#    - run: *test_compile
+#    - save_cache: *save_cache
+#    - save_cache: *remove_old_cache
+#  - &database
+#    - checkout
+#    - *attach_workspace
+#    - run: *dockerize
+#    - run: *start_database
+#    - run: *undo_db_migration
+#    - run: *run_db_migration
+#
+#  - &test_setup
+#    - checkout
+#    - *attach_workspace
+#    - run: *sbt_test
+#    - run: *push_coverage
+#
+#  #  build environment
+#  - &build_environment
+#    working_directory: ~/repo
+#    docker:
+#      - image: circleci/openjdk:8-jdk
+#
+#  - &test_environment
+#    working_directory: ~/repo
+#    docker:
+#      - image: circleci/openjdk:8-jdk
+#      # Service container image available at `host: localhost`
+#      - image: circleci/postgres:9.6.9-postgis
+#        environment:
+#          POSTGRES_USER: root
+#          POSTGRES_DB: el_documento_test
+#  - &environment
+#    environment:
+#      # Customize the JVM maximum heap limit
+#      JVM_OPTS: -Xmx3200m
+#      TERM: dumb
+#
+#  # Requirement groups
+#  - &deps
+#    - "Dependencies"
+#  - &deps_and_db
+#    - "Dependencies"
+#    - "Database"
+#  - &all_test
+#    - "Dependencies"
+#    - "Database"
+#    - "Test"
 
 
 version: 2
-workflows:
     jobs:
-      - "Dependencies"
-      - "Database":
-          requires: *deps_and_db
-      - "Test":
-          requires: *all_test
-
-jobs:
-  "Dependencies":
-    <<: *test_environment
-    steps: *dependencies
-  "Database":
-    <<: *test_environment
-    steps: *database
-  "Test":
-    <<: *test_environment
-    steps: *test_setup
+      build:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/openjdk:8-jdk
+          # Service container image available at `host: localhost`
+            - image: circleci/postgres:9.6.9-postgis
+              environment:
+                POSTGRES_USER: root
+                POSTGRES_DB: el_documento_test
+        environment:
+          # Customize the JVM maximum heap limit
+          JVM_OPTS: -Xmx3200m
+          TERM: dumb
+        steps:
+          - checkout
+          - run:
+              name: install dockerize
+              command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+              environment:
+                DOCKERIZE_VERSION: v0.6.1
+          - restore_cache:
+            key: ivy2-{{ checksum "build.sbt" }}
+          - run: sbt compile test:compile
+          - save_cache:
+              paths:
+                - ~/.ivy2
+              key: ivy2-{{ checksum "build.sbt" }}
+          - run:
+              name: Wait for postgres db to start
+              command: dockerize -wait tcp://localhost:5432 -timeout 1m
+          - run:
+              name: clean database
+              command: sbt test:flywayClean
+          - run:
+              name: migrate database for test
+              command: sbt test:flywayMigrate
+          - run:
+              name: sbt test
+              command: sbt clean coverage test coverageReport
+          - run:
+              name: push coverage to codecov
+              command: bash <(curl -s https://codecov.io/bash)
+#jobs:
+#  "Dependencies":
+#    <<: *test_environment
+#    steps: *dependencies
+#  "Database":
+#    <<: *test_environment
+#    steps: *database
+#  "Test":
+#    <<: *test_environment
+#    steps: *test_setup
