@@ -122,7 +122,7 @@ jobs:
           environment:
             DOCKERIZE_VERSION: v0.6.1
       - restore_cache:
-        key: ivy2-{{ checksum "build.sbt" }}
+          key: ivy2-{{ checksum "build.sbt" }}
       - run: sbt compile test:compile
       - save_cache:
           paths:
