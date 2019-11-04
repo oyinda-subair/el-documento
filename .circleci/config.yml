@@ -52,8 +52,6 @@ aliases:
     - run: *test_compile
     - save_cache: *save_cache
     - save_cache: *remove_old_cache
-    - persist_to_workspace:
-        root: .
   - &database
     - checkout
     - *attach_workspace
