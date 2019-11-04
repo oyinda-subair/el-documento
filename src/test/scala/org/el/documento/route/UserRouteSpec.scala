@@ -7,7 +7,6 @@ import org.el.documento.messages.{CreateRoleRequest, CreateUserRequest, LoginByE
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import org.el.documento.Util._
-import org.el.documento.model.{UserClaim, UserToken}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
