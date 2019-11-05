@@ -38,16 +38,14 @@ class UserRouteSpec extends WordSpec with Matchers with DocumentoRouteTestkit wi
 
   "El Documento user Route" when {
     "User Endpoints" should {
+      val userEntity = CreateUserRequest("test user", "usertest", s"user-$string10@email.com", s"$string10")
       "create user " in {
-        val userEntity = CreateUserRequest("test user", "usertest", s"user-$string10", s"$string10")
-
         Post(s"/$api/$version/users").withEntity(toEntity(userEntity)) ~> route ~> check {
           status shouldEqual StatusCodes.Created
         }
       }
 
-      "Login use" in {
-        val userEntity = CreateUserRequest("test user login", "userlogin", s"user-login-$string10", s"$string10")
+      "Login user" in {
         Post(s"/$api/$version/users").withEntity(toEntity(userEntity)) ~> route ~> check {
           status shouldEqual StatusCodes.Created
 
@@ -55,6 +53,21 @@ class UserRouteSpec extends WordSpec with Matchers with DocumentoRouteTestkit wi
           Post(s"/$api/$version/login").withEntity(toEntity(login)) ~> route ~> check {
             status shouldEqual StatusCodes.OK
           }
+        }
+      }
+      // wrong email
+      "Login with wrong email address" in {
+        val login = LoginByEmail(s"user-login-$string10@email.com", s"$string10")
+        Post(s"/$api/$version/login").withEntity(toEntity(login)) ~> route ~> check {
+          status shouldEqual StatusCodes.NotFound
+        }
+      }
+      //wrong password
+
+      "Login with wrong password" in {
+        val login = LoginByEmail(userEntity.email, s"$string10")
+        Post(s"/$api/$version/login").withEntity(toEntity(login)) ~> route ~> check {
+          status shouldEqual StatusCodes.Unauthorized
         }
       }
     }

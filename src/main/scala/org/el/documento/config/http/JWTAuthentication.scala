@@ -15,10 +15,8 @@ trait JWTAuthenticationServices {
 
 class JWTAuthentication extends ApplicationConfig with JWTAuthenticationServices {
   override def generateToken(userClaim: UserClaim): String = {
-    val json = Json.toJson(userClaim)
-    val jsonString = json.toString()
     try {
-      Jwt.encode(jsonString, secret, JwtAlgorithm.HS256)
+      Jwt.encode(Json.toJson(userClaim).toString(), secret, JwtAlgorithm.HS256)
     }catch {
       case e: Exception =>
         logger.error("Error encoding token")
